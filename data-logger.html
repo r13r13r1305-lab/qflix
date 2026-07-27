@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة حفظ وتتبع البيانات (Data Logger)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0f172a; color: #f8fafc; padding: 20px; min-height: 100vh; }
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        h1 { text-align: center; margin-bottom: 25px; color: #38bdf8; font-size: 26px; }
+        
+        .card { background: #1e293b; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.3); margin-bottom: 20px; border: 1px solid #334155; }
+        .card h2 { font-size: 18px; margin-bottom: 15px; color: #cbd5e1; border-bottom: 2px solid #334155; padding-bottom: 8px; }
+        
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-size: 14px; color: #94a3b8; }
+        input, textarea { width: 100%; padding: 10px; background: #0f172a; border: 1px solid #475569; border-radius: 6px; color: #fff; font-size: 14px; }
+        input:focus, textarea:focus { outline: none; border-color: #38bdf8; }
+        
+        .btn { background: #0284c7; color: #white; border: none; padding: 10px 20px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; transition: background 0.2s; }
+        .btn:hover { background: #0369a1; }
+        .btn-danger { background: #ef4444; padding: 5px 10px; font-size: 12px; }
+        .btn-danger:hover { background: #dc2626; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; text-align: right; }
+        th, td { padding: 12px; border-bottom: 1px solid #334155; font-size: 14px; }
+        th { background: #0f172a; color: #38bdf8; }
+        tr:hover { background: #263348; }
+
+        .log-box { background: #0f172a; border: 1px solid #334155; border-radius: 6px; padding: 10px; max-height: 150px; overflow-y: auto; font-family: monospace; font-size: 12px; color: #34d399; }
+        .log-item { margin-bottom: 5px; border-bottom: 1px dashed #1e293b; padding-bottom: 3px; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📊 نظام حفظ البيانات وتتبع السجلات (Logger)</h1>
+
+        <div class="card">
+            <h2>إضافة بيانات جديدة</h2>
+            <div class="form-group">
+                <label>عنوان البيانات أو الاسم:</label>
+                <input type="text" id="data-title" placeholder="أدخل العنوان هنا...">
+            </div>
+            <div class="form-group">
+                <label>التفاصيل أو المحتوى:</label>
+                <textarea id="data-content" rows="3" placeholder="أدخل محتوى أو تفاصيل البيانات..."></textarea>
+            </div>
+            <button class="btn" onclick="saveData()">حفظ البيانات وتسجيل الحدث</button>
+        </div>
+
+        <div class="card">
+            <h2>البيانات المحفوظة حالياً</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>العنوان</th>
+                        <th>المحتوى</th>
+                        <th>تاريخ الحفظ</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody id="data-table-body">
+                    </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>سجل تتبع العمليات (Activity Log)</h2>
+            <div class="log-box" id="log-container">
+                <div class="log-item">[النظام] جاهز لاستقبال وحفظ البيانات وتتبعها...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // تحميل البيانات والـ Logs عند فتح الصفحة
+        window.onload = function() {
+            renderData();
+        };
+
+        function addLog(actionText) {
+            const logContainer = document.getElementById('log-container');
+            const now = new Date().toLocaleString('ar-SA');
+            const logItem = document.createElement('div');
+            logItem.className = 'log-item';
+            logItem.innerHTML = `[${now}] ${actionText}`;
+            logContainer.prepend(logItem); // إضافة أحدث log بالأعلى
+        }
+
+        function saveData() {
+            const title = document.getElementById('data-title').value.trim();
+            const content = document.getElementById('data-content').value.trim();
+
+            if(!title || !content) {
+                alert('الرجاء تعبئة العنوان والمحتوى أولاً!');
+                return;
+            }
+
+            const storedData = JSON.parse(localStorage.getItem('saved_records') || '[]');
+            const newRecord = {
+                id: Date.now(),
+                title: title,
+                content: content,
+                date: new Date().toLocaleString('ar-SA')
+            };
+
+            storedData.push(newRecord);
+            localStorage.setItem('saved_records', JSON.stringify(storedData));
+
+            // تفريغ الحقول
+            document.getElementById('data-title').value = '';
+            document.getElementById('data-content').value = '';
+
+            addLog(`تم حفظ بيان جديد بعنوان: "${title}" بنجاح.`);
+            renderData();
+        }
+
+        function renderData() {
+            const storedData = JSON.parse(localStorage.getItem('saved_records') || '[]');
+            const tbody = document.getElementById('data-table-body');
+            
+            if(storedData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:#64748b;">لا توجد بيانات محفوظة حالياً.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = storedData.map((item, index) => `
+                <tr>
+                    <td>${index + 1}</td>
+                    <td><b>${item.title}</b></td>
+                    <td>${item.content}</td>
+                    <td style="font-size: 12px; color: #94a3b8;">${item.date}</td>
+                    <td><button class="btn btn-danger" onclick="deleteData(${item.id}, '${item.title}')">حذف</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteData(id, title) {
+            let storedData = JSON.parse(localStorage.getItem('saved_records') || '[]');
+            storedData = storedData.filter(item => item.id !== id);
+            localStorage.setItem('saved_records', JSON.stringify(storedData));
+
+            addLog(`تم حذف البيان: "${title}" من النظام.`);
+            renderData();
+        }
+    </script>
+</body>
+</html>
