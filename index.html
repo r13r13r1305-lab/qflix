@@ -3,24 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سينما السعودية - Cinema Plus</title>
+    <title>QFLIX</title>
     
-    <!-- إعدادات تطبيق الويب (PWA) للأيفون -->
+    <!-- إعدادات تطبيق الويب والتثبيت على الشاشة الرئيسية والأيقونة الحمراء الحرف Q -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Cinema Plus">
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/150/E50914/FFFFFF?text=CINEMA">
+    <meta name="apple-mobile-web-app-title" content="QFLIX">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/E50914/FFFFFF?text=Q">
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background-color: #141414; color: #fff; padding-bottom: 50px; }
-        
-        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.9); position: sticky; top: 0; z-index: 1000; }
-        .logo { color: #E50914; font-size: 22px; font-weight: bold; letter-spacing: 1px; }
-        .badge { background: #333; font-size: 11px; padding: 4px 8px; border-radius: 4px; color: #aaa; }
+        body { background-color: #141414; color: #fff; min-height: 100vh; }
 
-        .pwa-banner { background: #1f1f1f; border-bottom: 1px solid #333; padding: 10px 20px; font-size: 13px; text-align: center; color: #ddd; }
-        .pwa-banner span { color: #E50914; font-weight: bold; }
+        /* شاشة البداية QFLIX */
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; justify-content: center; align-items: center; animation: fadeOut 0.5s ease 2s forwards; pointer-events: none; }
+        .splash-logo { color: #E50914; font-size: 48px; font-weight: 900; letter-spacing: 2px; text-transform: uppercase; }
+        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
+
+        /* شاشة منع التصفح من المتصفح العادي (إجبار الإضافة للشاشة الرئيسية) */
+        #pwa-lock { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141414; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 30px; }
+        #pwa-lock h1 { color: #E50914; font-size: 26px; margin-bottom: 15px; }
+        #pwa-lock p { color: #aaa; font-size: 15px; line-height: 1.6; max-width: 400px; }
+
+        /* شاشة تسجيل الدخول وإنشاء الحساب */
+        #auth-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; justify-content: center; align-items: center; padding: 20px; }
+        .auth-box { background: #1f1f1f; padding: 30px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center; border: 1px sild #333; }
+        .auth-box h2 { color: #E50914; margin-bottom: 20px; font-size: 22px; }
+        .auth-input { width: 100%; padding: 12px; margin-bottom: 15px; background: #333; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 14px; }
+        .auth-btn { width: 100%; padding: 12px; background: #E50914; color: #fff; border: none; border-radius: 6px; font-weight: bold; font-size: 16px; cursor: pointer; }
+
+        /* شاشة اختيار وإدارة الملفات الشخصية (Profiles مثل الصورة) */
+        #profiles-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141414; z-index: 7000; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .profiles-title { font-size: 24px; margin-bottom: 30px; font-weight: 500; color: #fff; }
+        .profiles-grid { display: grid; grid-template-columns: repeat(2, 110px); gap: 20px; justify-content: center; }
+        .profile-card { text-align: center; cursor: pointer; }
+        .profile-avatar { width: 100px; height: 100px; border-radius: 8px; background: #333; display: flex; justify-content: center; align-items: center; font-size: 28px; font-weight: bold; color: #fff; border: 2px solid transparent; transition: 0.2s; overflow: hidden; }
+        .profile-card:hover .profile-avatar { border-color: #fff; }
+        .profile-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-name { margin-top: 8px; font-size: 14px; color: #aaa; }
+        .add-profile-btn { background: #222; border: 2px dashed #555; color: #aaa; }
+
+        /* لوحة التحكم الرئيسية للموقع (الأفلام) */
+        #main-content { display: none; }
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.9); position: sticky; top: 0; z-index: 1000; }
+        .logo { color: #E50914; font-size: 22px; font-weight: 900; letter-spacing: 1px; }
+        .current-profile { background: #333; font-size: 12px; padding: 5px 12px; border-radius: 20px; color: #ddd; display: flex; align-items: center; gap: 6px; cursor: pointer; }
 
         .section-title { font-size: 18px; margin: 25px 15px 10px; font-weight: bold; border-right: 4px solid #E50914; padding-right: 8px; }
         .movies-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 15px; }
@@ -28,101 +55,184 @@
 
         .movie-card { background: #1f1f1f; border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
         .movie-card:active { transform: scale(0.97); }
-        .movie-poster { width: 100%; height: 200px; object-fit: cover; background: #333; }
+        .movie-poster { width: 100%; height: 220px; object-fit: cover; background: #222; }
         .movie-info { padding: 10px; }
         .movie-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .movie-cat { font-size: 11px; color: #888; }
 
-        /* شاشة الحظر التام عند تفعيل مانع الإعلانات */
-        #blocker-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141414; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
-        #blocker-overlay h1 { color: #E50914; font-size: 24px; margin-bottom: 15px; }
-        #blocker-overlay p { color: #aaa; font-size: 14px; max-width: 400px; line-height: 1.6; }
-
-        /* نافذة المشغل والإعلانات الإجبارية */
-        #player-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        /* مشغل الفيديو والإعلانات الإجبارية */
+        #player-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 9000; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
         .close-btn { position: absolute; top: 20px; left: 20px; background: #333; color: #fff; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
-        
         .ad-container { width: 100%; max-width: 700px; height: 350px; background: #000; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid #333; position: relative; text-align: center; padding: 20px; }
         .ad-timer { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 5px 10px; border-radius: 4px; font-size: 12px; }
     </style>
 </head>
 <body>
 
-    <!-- شاشة الحظر في حال استخدام Ad Blocker -->
-    <div id="blocker-overlay">
-        <h1>⚠️ عذراً عزيزي الزائر</h1>
-        <p>لا يمكنك تصفح المنصة أو مشاهدة الأفلام بينما تقوم بتفعيل <b>مانع الإعلانات (Ad Blocker)</b>. يرجى إيقافه لتستمتع بمشاهدة مجانية بالكامل.</p>
+    <!-- شاشة البداية QFLIX -->
+    <div id="splash-screen">
+        <div class="splash-logo">QFLIX</div>
     </div>
 
-    <header>
-        <div class="logo">CINEMA+</div>
-        <div class="badge">السعودية 🇸🇦</div>
-    </header>
-
-    <div class="pwa-banner">
-        💡 لتجربة تطبيق حقيقية: اضغط زر <span>المشاركة (Share)</span> في سفاري ثم <span>"إضافة إلى الشاشة الرئيسية"</span>.
+    <!-- شاشة حظر المتصفح العادي (إجبار إضافة التطبيق للشاشة الرئيسية) -->
+    <div id="pwa-lock">
+        <h1>QFLIX 🇸🇦</h1>
+        <p>عذراً عزيزي المستخدم، لتشغيل المنصة المجانية ومتابعة الأفلام، يجب عليك إضافة التطبيق إلى <b>الشاشة الرئيسية</b> عبر متصفح سفاري (ضغط زر المشاركة ثم إضافة إلى الشاشة الرئيسية).</p>
     </div>
 
-    <div class="section-title">أفلام Netflix الرائجة</div>
-    <div class="movies-grid" id="netflix-grid"></div>
-
-    <div class="section-title">أحدث أفلام السينما (Box Office)</div>
-    <div class="movies-grid" id="cinema-grid"></div>
-
-    <div class="section-title">مكتبة OSN & MovieBox</div>
-    <div class="movies-grid" id="osn-grid"></div>
-
-    <!-- نافذة العرض والإعلانات الربحية -->
-    <div id="player-modal">
-        <button class="close-btn" id="close-modal-btn" style="display:none;" onclick="closePlayer()">إغلاق ✕</button>
-        <div class="ad-container" id="ad-or-movie-box">
-            <!-- سيتم حقن الإعلان هنا -->
+    <!-- شاشة تسجيل الدخول وإنشاء حساب -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <h2>تسجيل الدخول في QFLIX</h2>
+            <input type="text" id="username-input" class="auth-input" placeholder="اسم المستخدم أو البريد">
+            <input type="password" id="password-input" class="auth-input" placeholder="كلمة المرور">
+            <button class="auth-btn" onclick="handleAuth()">دخول / إنشاء حساب</button>
         </div>
     </div>
 
-    <script>
-        // 1. كشف مانع الإعلانات
-        function checkAdBlocker() {
-            const bait = document.createElement('div');
-            bait.innerHTML = '&nbsp;';
-            bait.className = 'adsbox ad-zone doubleclick pub_300x250';
-            bait.style.position = 'absolute';
-            bait.style.left = '-999px';
-            document.body.appendChild(bait);
+    <!-- شاشة اختيار وإدارة الملفات الشخصية -->
+    <div id="profiles-screen">
+        <div class="profiles-title">من يشاهد الفيلم الآن؟</div>
+        <div class="profiles-grid" id="profiles-container">
+            <!-- يتم تعبئتها عبر الجافاسكريبت -->
+        </div>
+        <div style="margin-top: 30px;">
+            <button onclick="addNewProfile()" style="background:transparent; border:1px solid #777; color:#fff; padding:8px 20px; border-radius:4px; cursor:pointer;">+ إضافة حساب جديد</button>
+        </div>
+    </div>
 
-            setTimeout(function() {
-                if (bait.offsetHeight === 0 || window.getComputedStyle(bait).display === 'none') {
-                    document.getElementById('blocker-overlay').style.display = 'flex';
-                }
-                bait.remove();
-            }, 100);
+    <!-- المحتوى الرئيسي للموقع (مخفي حتى يتم تسجيل الدخول واختيار الحساب) -->
+    <div id="main-content">
+        <header>
+            <div class="logo">QFLIX</div>
+            <div class="current-profile" onclick="switchProfile()" id="active-profile-display">
+                👤 الملف الشخصي
+            </div>
+        </header>
+
+        <div class="section-title">أفلام نتفلكس الرائجة</div>
+        <div class="movies-grid" id="netflix-grid"></div>
+
+        <div class="section-title">أحدث أفلام السينما (Box Office)</div>
+        <div class="movies-grid" id="cinema-grid"></div>
+
+        <div class="section-title">مكتبة OSN & MovieBox</div>
+        <div class="movies-grid" id="osn-grid"></div>
+    </div>
+
+    <!-- نافذة العرض والإعلانات الإجبارية -->
+    <div id="player-modal">
+        <button class="close-btn" id="close-modal-btn" style="display:none;" onclick="closePlayer()">إغلاق ✕</button>
+        <div class="ad-container" id="ad-or-movie-box"></div>
+    </div>
+
+    <script>
+        // 1. التحقق من تشغيل التطبيق من الشاشة الرئيسية (Standalone Mode) للأيفون
+        window.addEventListener('DOMContentLoaded', () => {
+            const isInStandaloneMode = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
+            
+            // للتجربة المحلية أو إذا لم تكن في وضع الشاشة الرئيسية، يمكنك إلغاء التعليق لاختبار الواجهة، لكن الشرط هنا مفعل تماماً لطلبتك:
+            if (!isInStandaloneMode) {
+                // لإظهار قفل المتصفح العادي:
+                document.getElementById('pwa-lock').style.display = 'flex';
+                return;
+            }
+
+            checkUserSession();
+        });
+
+        function checkUserSession() {
+            const savedUser = localStorage.getItem('qflix_user');
+            if (!savedUser) {
+                document.getElementById('auth-screen').style.display = 'flex';
+            } else {
+                loadProfiles();
+            }
         }
 
-        window.onload = function() {
-            checkAdBlocker();
-        };
+        function handleAuth() {
+            const user = document.getElementById('username-input').value.trim();
+            const pass = document.getElementById('password-input').value.trim();
+            if(!user || !pass) {
+                alert('الرجاء إدخال اسم المستخدم وكلمة المرور');
+                return;
+            }
+            localStorage.setItem('qflix_user', user);
+            
+            // إنشاء ملف افتراضي أول لو لم يوجد
+            if(!localStorage.getItem('qflix_profiles')) {
+                localStorage.setItem('qflix_profiles', JSON.stringify([{name: user, color: '#E50914'}]));
+            }
 
-        // 2. قوائم الأفلام
-        const movies = {
+            document.getElementById('auth-screen').style.display = 'none';
+            loadProfiles();
+        }
+
+        // 2. إدارة الملفات الشخصية (Profiles)
+        function loadProfiles() {
+            document.getElementById('profiles-screen').style.display = 'flex';
+            let profiles = JSON.parse(localStorage.getItem('qflix_profiles')) || [{name: 'الرئيسي', color: '#E50914'}];
+            
+            const container = document.getElementById('profiles-container');
+            container.innerHTML = profiles.map((p, index) => `
+                <div class="profile-card" onclick="selectProfile('${p.name}')">
+                    <div class="profile-avatar" style="background: ${p.color};">${p.name.charAt(0).toUpperCase()}</div>
+                    <div class="profile-name">${p.name}</div>
+                </div>
+            `).join('');
+        }
+
+        function addNewProfile() {
+            let name = prompt('أدخل اسم الحساب الجديد (مثال: رشا، مهند...):');
+            if(name) {
+                let profiles = JSON.parse(localStorage.getItem('qflix_profiles')) || [];
+                const colors = ['#0071eb', '#221f1f', '#b81d24', '#e50914', '#564d4d'];
+                let randomColor = colors[Math.floor(Math.random() * colors.length)];
+                profiles.push({name: name, color: randomColor});
+                localStorage.setItem('qflix_profiles', JSON.stringify(profiles));
+                loadProfiles();
+            }
+        }
+
+        function selectProfile(profileName) {
+            document.getElementById('profiles-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+            document.getElementById('active-profile-display').innerHTML = `👤 ${profileName}`;
+            initMovies();
+        }
+
+        function switchProfile() {
+            document.getElementById('main-content').style.display = 'none';
+            loadProfiles();
+        }
+
+        // 3. قاعدة بيانات الأفلام مع صور حقيقية ومضمونة (TMDB/Unsplash API بالصور)
+        const moviesData = {
             netflix: [
-                { title: "Strangers 4", cat: "نتفلكس - إثارة", img: "https://via.placeholder.com/300x450/111/fff?text=Netflix+1" },
-                { title: "Extraction 3", cat: "نتفلكس - أكشن", img: "https://via.placeholder.com/300x450/222/fff?text=Netflix+2" }
+                { title: "Strangers 4", cat: "نتفلكس - إثارة", img: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" },
+                { title: "Extraction 3", cat: "نتفلكس - أكشن", img: "https://image.tmdb.org/t/p/w500/AmR3hzcyNpGMfUnzMI7XW15iM8x.jpg" }
             ],
             cinema: [
-                { title: "Avatar: Fire & Ash", cat: "سينما - خيال علمي", img: "https://via.placeholder.com/300x450/333/fff?text=Cinema+1" },
-                { title: "Mission Impossible", cat: "سينما - أكشن", img: "https://via.placeholder.com/300x450/444/fff?text=Cinema+2" }
+                { title: "Avatar: Fire & Ash", cat: "سينما - خيال علمي", img: "https://image.tmdb.org/t/p/w500/kyeqWdyUXW608qlYkRqosgbbJyK.jpg" },
+                { title: "Mission Impossible", cat: "سينما - أكشن", img: "https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYAmacwm.jpg" }
             ],
             osn: [
-                { title: "Exclusive Series", cat: "OSN - دراما", img: "https://via.placeholder.com/300x450/555/fff?text=OSN+1" },
-                { title: "MovieBox Classics", cat: "MovieBox - منوعة", img: "https://via.placeholder.com/300x450/666/fff?text=MovieBox+1" }
+                { title: "Exclusive Series", cat: "OSN - دراما", img: "https://image.tmdb.org/t/p/w500/uNZHUbxLNIlpLz7a17N9w5xP9hX.jpg" },
+                { title: "MovieBox Classics", cat: "MovieBox - منوعة", img: "https://image.tmdb.org/t/p/w500/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg" }
             ]
         };
+
+        function initMovies() {
+            renderSection('netflix-grid', moviesData.netflix);
+            renderSection('cinema-grid', moviesData.cinema);
+            renderSection('osn-grid', moviesData.osn);
+        }
 
         function renderSection(containerId, data) {
             const container = document.getElementById(containerId);
             container.innerHTML = data.map(m => `
                 <div class="movie-card" onclick="startMovieProcess('${m.title}')">
-                    <img src="${m.img}" class="movie-poster" alt="${m.title}">
+                    <img src="${m.img}" class="movie-poster" alt="${m.title}" onerror="this.src='https://via.placeholder.com/300x450/222/fff?text=QFLIX'">
                     <div class="movie-info">
                         <div class="movie-title">${m.title}</div>
                         <div class="movie-cat">${m.cat}</div>
@@ -131,30 +241,19 @@
             `).join('');
         }
 
-        renderSection('netflix-grid', movies.netflix);
-        renderSection('cinema-grid', movies.cinema);
-        renderSection('osn-grid', movies.osn);
-
-        // 3. نظام الإعلان الإلزامي للربح (يمكنك وضع رابط Direct Link الخاص بـ HilltopAds هنا)
+        // 4. نظام الإعلان الإلزامي قبل تشغيل الفيلم
         function startMovieProcess(movieTitle) {
-            if(document.getElementById('blocker-overlay').style.display === 'flex') {
-                alert("يرجى إيقاف مانع الإعلانات أولاً.");
-                return;
-            }
-
             document.getElementById('player-modal').style.display = 'flex';
             const container = document.getElementById('ad-or-movie-box');
             document.getElementById('close-modal-btn').style.display = 'none';
 
-            let timeLeft = 5; // 5 ثواني إعلان إلزامي
-            
+            let timeLeft = 5; 
             container.innerHTML = `
                 <div class="ad-timer" id="timer-box">إعلان المنصة: (${timeLeft} ث)</div>
-                <div style="font-size: 16px; color: #ffcc00; margin-bottom: 10px;">📢 إعلان ممول لدعم استمرار الموقع</div>
+                <div style="font-size: 16px; color: #ffcc00; margin-bottom: 10px;">📢 إعلان ممول لدعم استمرار QFLIX</div>
                 <div style="color: #fff; font-size: 14px;">
-                    يرجى الانتظار حتى ينتهي العد التنازلي لتتمكن من مشاهدة الفيلم مجاناً.<br>
-                    <!-- ضع رابط شركة الإعلانات هنا بدلاً من example.com -->
-                    <a href="https://example.com" target="_blank" style="color: #E50914; text-decoration: underline; display:inline-block; margin-top:15px; font-weight:bold;">اضغط هنا لزيارة راعي المنصة</a>
+                    يرجى الانتظار حتى ينتهي العد التنازلي لمشاهدة الفيلم مجاناً.<br>
+                    <a href="https://example.com" target="_blank" style="color: #E50914; text-decoration: underline; display:inline-block; margin-top:15px; font-weight:bold;">زيارة راعي الموقع</a>
                 </div>
             `;
 
@@ -168,7 +267,7 @@
                     container.innerHTML = `
                         <div style="font-size: 18px; color: #46d369; margin-bottom: 10px; font-weight:bold;">✅ تم التحقق بنجاح</div>
                         <div style="color: #fff; font-size: 15px;">جاري تشغيل: <b>${movieTitle}</b></div>
-                        <div style="margin-top: 15px; color: #888; font-size: 13px;">(مكان مشغل الفيلم الخارجي أو الـ Embed)</div>
+                        <div style="margin-top: 15px; color: #888; font-size: 13px;">(مكان مشغل الفيديو الخارجي أو الـ Embed)</div>
                     `;
                     document.getElementById('close-modal-btn').style.display = 'block';
                 }
