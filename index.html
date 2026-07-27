@@ -8,19 +8,10 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="QFLIX">
-    <link rel="apple-touch-icon" href="https://via.placeholder.com/180/E50914/FFFFFF?text=Q">
 
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #141414; color: #fff; min-height: 100vh; padding-bottom: 70px; }
-
-        /* شاشة البداية المطابقة */
-        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 10000; display: flex; flex-direction: column; justify-content: center; align-items: center; animation: fadeOut 0.5s ease 1.5s forwards; pointer-events: none; }
-        .splash-avatar-box { width: 120px; height: 120px; border-radius: 16px; background: #22ab4b; display: flex; justify-content: center; align-items: center; margin-bottom: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .splash-smile { font-size: 70px; color: #fff; line-height: 0; margin-top: -10px; }
-        .loader-ring { width: 45px; height: 45px; border: 4px solid #333; border-top: 4px solid #E50914; border-radius: 50%; animation: spin 0.8s linear infinite; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeOut { to { opacity: 0; visibility: hidden; } }
 
         /* قفل المتصفح العادي */
         #pwa-lock { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141414; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 30px; }
@@ -28,7 +19,7 @@
         #pwa-lock p { color: #aaa; font-size: 15px; line-height: 1.6; max-width: 400px; }
 
         /* تسجيل الدخول */
-        #auth-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; justify-content: center; align-items: center; padding: 20px; }
+        #auth-screen { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; justify-content: center; align-items: center; padding: 20px; }
         .auth-box { background: #1f1f1f; padding: 30px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center; border: 1px solid #333; }
         .auth-box h2 { color: #E50914; margin-bottom: 20px; font-size: 24px; }
         .auth-input { width: 100%; padding: 12px; margin-bottom: 15px; background: #333; border: 1px solid #444; border-radius: 6px; color: #fff; font-size: 14px; }
@@ -53,12 +44,12 @@
         .nav-tab { background: rgba(255,255,255,0.1); color: #ddd; padding: 6px 14px; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; border: 1px solid rgba(255,255,255,0.15); }
         .nav-tab.active { background: #fff; color: #000; font-weight: bold; }
 
-        .hero-banner { position: relative; width: 100%; height: 450px; background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; text-align: center; }
-        .hero-banner::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 150px; background: linear-gradient(to top, #141414, transparent); }
-        .hero-title-img { font-size: 30px; font-weight: 900; margin-bottom: 8px; text-shadow: 0 2px 10px rgba(0,0,0,0.8); position: relative; z-index: 2; }
-        .hero-tags { font-size: 13px; color: #ccc; margin-bottom: 15px; position: relative; z-index: 2; display: flex; justify-content: center; gap: 8px; }
+        .hero-banner { position: relative; width: 100%; height: 400px; background-size: cover; background-position: center; display: flex; flex-direction: column; justify-content: flex-end; padding: 20px; text-align: center; }
+        .hero-banner::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 120px; background: linear-gradient(to top, #141414, transparent); }
+        .hero-title-img { font-size: 28px; font-weight: 900; margin-bottom: 8px; position: relative; z-index: 2; }
+        .hero-tags { font-size: 13px; color: #ccc; margin-bottom: 15px; position: relative; z-index: 2; }
         .hero-buttons { display: flex; gap: 10px; position: relative; z-index: 2; justify-content: center; }
-        .hero-btn { flex: 1; max-width: 140px; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; border: none; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .hero-btn { flex: 1; max-width: 130px; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; border: none; }
         .btn-play { background: #fff; color: #000; }
         .btn-mylist { background: rgba(109, 109, 110, 0.7); color: #fff; }
 
@@ -69,49 +60,22 @@
         .movie-poster-row { width: 100%; height: 165px; object-fit: cover; background: #222; }
         .movie-title-row { font-size: 11px; padding: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center; color: #ccc; }
 
-        /* صفحة تفاصيل العرض الاحترافية */
+        /* صفحة تفاصيل الفلم */
         #detail-view { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141414; z-index: 6000; overflow-y: auto; }
-        .detail-video-container { position: relative; width: 100%; height: 260px; background: #000; }
+        .detail-video-container { position: relative; width: 100%; height: 240px; background: #000; }
         .detail-video-container video { width: 100%; height: 100%; object-fit: cover; }
-        .detail-close-btn { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); color: #fff; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; }
-        .detail-mute-btn { position: absolute; bottom: 15px; left: 15px; background: rgba(0,0,0,0.6); color: #fff; border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 14px; display: flex; justify-content: center; align-items: center; cursor: pointer; z-index: 10; }
-        
+        .detail-close-btn { position: absolute; top: 15px; left: 15px; background: rgba(0,0,0,0.6); color: #fff; border: none; width: 36px; height: 36px; border-radius: 50%; font-size: 18px; cursor: pointer; z-index: 10; display: flex; justify-content: center; align-items: center; }
         .detail-content-body { padding: 15px; }
-        .detail-title { font-size: 24px; font-weight: 900; margin-bottom: 8px; }
-        .detail-meta-info { display: flex; align-items: center; gap: 10px; font-size: 13px; color: #aaa; margin-bottom: 12px; }
-        .detail-badge { background: #333; padding: 2px 6px; border-radius: 3px; font-size: 11px; color: #fff; }
-        
-        .detail-actions { display: flex; flex-direction: column; gap: 8px; margin-bottom: 15px; }
-        .btn-main-action { width: 100%; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 15px; border: none; display: flex; justify-content: center; align-items: center; gap: 8px; cursor: pointer; }
-        .btn-white { background: #fff; color: #000; }
-        .btn-dark { background: #262626; color: #fff; }
-
+        .detail-title { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
         .detail-desc { font-size: 13px; color: #ccc; line-height: 1.5; margin-bottom: 15px; }
-        .detail-toolbar { display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #222; border-bottom: 1px solid #222; margin-bottom: 15px; }
-        .toolbar-item { display: flex; flex-direction: column; align-items: center; font-size: 11px; color: #aaa; gap: 5px; cursor: pointer; }
-        .toolbar-item span:first-child { font-size: 18px; }
 
-        .detail-tabs { display: flex; gap: 20px; border-bottom: 1px solid #333; margin-bottom: 15px; font-size: 14px; }
-        .detail-tab { padding-bottom: 8px; color: #777; cursor: pointer; position: relative; }
-        .detail-tab.active { color: #fff; font-weight: bold; }
-        .detail-tab.active::after { content: ''; position: absolute; bottom: -1px; left: 0; width: 100%; height: 3px; background: #E50914; }
-
-        .episode-item { display: flex; gap: 10px; margin-bottom: 15px; align-items: center; cursor: pointer; }
-        .episode-thumb-box { position: relative; width: 120px; height: 70px; background: #222; border-radius: 4px; overflow: hidden; flex-shrink: 0; }
-        .episode-thumb { width: 100%; height: 100%; object-fit: cover; }
-        .episode-play-icon { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 20px; color: #fff; background: rgba(0,0,0,0.5); width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; }
-        .episode-info { flex: 1; }
-        .episode-title-row { font-size: 13px; font-weight: bold; margin-bottom: 4px; }
-        .episode-duration { font-size: 11px; color: #888; }
-        .episode-desc { font-size: 11px; color: #aaa; margin-top: 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
-
-        /* مشغل الفيديوهات المباشر الحقيقي بدون إعلانات */
+        /* مشغل الفيديوهات المباشر */
         #video-player-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 12000; flex-direction: column; justify-content: center; align-items: center; }
-        #actual-video-player { width: 100%; height: 100%; max-height: 100vh; object-fit: contain; }
-        .video-back-btn { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; z-index: 13000; font-size: 14px; }
+        #actual-video-player { width: 100%; height: 100%; object-fit: contain; }
+        .video-back-btn { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.7); color: #fff; border: 1px solid #555; padding: 8px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; z-index: 13000; }
 
-        /* الشريط السفلي الثابت */
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,20,20,0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #282828; z-index: 1000; }
+        /* الشريط السفلي */
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: rgba(20,20,20,0.95); display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #282828; z-index: 1000; }
         .nav-item { display: flex; flex-direction: column; align-items: center; color: #8c8c8c; cursor: pointer; font-size: 11px; gap: 4px; }
         .nav-item.active { color: #fff; }
         .nav-icon { font-size: 20px; }
@@ -119,16 +83,13 @@
 </head>
 <body>
 
-    <div id="splash-screen">
-        <div class="splash-avatar-box"><span class="splash-smile">😊</span></div>
-        <div class="loader-ring"></div>
-    </div>
-
+    <!-- قفل المتصفح العادي -->
     <div id="pwa-lock">
         <h1>QFLIX 🇸🇦</h1>
         <p>لتشغيل المنصة، يرجى إضافة التطبيق إلى <b>الشاشة الرئيسية</b> عبر سفاري (Share > Add to Home Screen).</p>
     </div>
 
+    <!-- تسجيل الدخول -->
     <div id="auth-screen">
         <div class="auth-box">
             <h2>تسجيل دخول QFLIX</h2>
@@ -138,11 +99,22 @@
         </div>
     </div>
 
+    <!-- الملفات الشخصية -->
     <div id="profiles-screen">
         <div class="profiles-title">من يشاهد الآن؟</div>
-        <div class="profiles-grid" id="profiles-container"></div>
+        <div class="profiles-grid">
+            <div class="profile-card" onclick="selectProfile()">
+                <div class="profile-avatar">😊</div>
+                <div class="profile-name">الملف الرئيسي</div>
+            </div>
+            <div class="profile-card" onclick="selectProfile()">
+                <div class="profile-avatar" style="background:#e50914;">🎬</div>
+                <div class="profile-name">أفلام ومسلسلات</div>
+            </div>
+        </div>
     </div>
 
+    <!-- الواجهة الرئيسية -->
     <div id="main-content">
         <header>
             <div class="header-top">
@@ -150,20 +122,20 @@
                 <div style="font-size: 18px; cursor: pointer;" onclick="alert('خاصية البحث مفعلة')">🔍</div>
             </div>
             <div class="header-nav-tabs">
-                <div class="nav-tab active" onclick="switchCategory('all', this)">الرئيسية</div>
-                <div class="nav-tab" onclick="switchCategory('kids', this)">أطفال والرسوم المتحركة</div>
-                <div class="nav-tab" onclick="switchCategory('arabic', this)">مصري وعربي</div>
-                <div class="nav-tab" onclick="switchCategory('action', this)">أكشن ومغامرة</div>
-                <div class="nav-tab" onclick="switchCategory('comedy', this)">كوميدي</div>
+                <div class="nav-tab active">الرئيسية</div>
+                <div class="nav-tab">أطفال والرسوم المتحركة</div>
+                <div class="nav-tab">مصري وعربي</div>
+                <div class="nav-tab">أكشن ومغامرة</div>
+                <div class="nav-tab">كوميدي</div>
             </div>
         </header>
 
         <div class="hero-banner" style="background-image: url('https://image.tmdb.org/t/p/original/kyeqWdyUXW608qlYkRqosgbbJyK.jpg');">
             <div class="hero-title-img">الوسيط الروحي</div>
-            <div class="hero-tags"><span>أحدث الإصدارات</span> • <span>غموض</span> • <span>حلقات كاملة</span></div>
+            <div class="hero-tags">أحدث الإصدارات • غموض • حلقات كاملة</div>
             <div class="hero-buttons">
-                <button class="hero-btn btn-play" onclick="openDetailView('الوسيط الروحي', 'عمل درامي غامض وشيق مليء بالأحداث غير المتوقعة.', '2026', '8 حلقات')">▶ عرض</button>
-                <button class="hero-btn btn-mylist" onclick="alert('تمت الإضافة لقائمتك بنجاح')">＋ قائمتي</button>
+                <button class="hero-btn btn-play" onclick="playMovieDirectly()">▶ عرض</button>
+                <button class="hero-btn btn-mylist" onclick="alert('تمت الإضافة لقائمتك')">＋ قائمتي</button>
             </div>
         </div>
 
@@ -178,136 +150,53 @@
 
         <div class="section-title">أفلام الكوميديا والترفيه</div>
         <div class="movies-row" id="row-comedy"></div>
-
-        <div class="section-title">أبرز الإصدارات العالمية</div>
-        <div class="movies-row" id="row-global"></div>
     </div>
 
+    <!-- تفاصيل الفلم -->
     <div id="detail-view">
         <div class="detail-video-container">
             <button class="detail-close-btn" onclick="closeDetailView()">✕</button>
-            <video id="trailer-video" autoplay muted loop playsinline poster="https://image.tmdb.org/t/p/original/kyeqWdyUXW608qlYkRqosgbbJyK.jpg">
+            <video id="trailer-video" autoplay muted loop playsinline>
                 <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
             </video>
-            <button class="detail-mute-btn" id="mute-toggle-btn" onclick="toggleMute()">🔊</button>
         </div>
-        
         <div class="detail-content-body">
             <div class="detail-title" id="det-title">عنوان العرض</div>
-            <div class="detail-meta-info">
-                <span style="color: #46d369; font-weight: bold;">توافق 99%</span>
-                <span id="det-year">2026</span>
-                <span class="detail-badge">+13</span>
-                <span id="det-episodes-count">8 حلقات</span>
-                <span class="detail-badge">HD</span>
-            </div>
-
-            <div class="detail-actions">
-                <button class="btn-main-action btn-white" onclick="playMovieDirectly()">▶ تشغيل الفلم / الحلقة الأولى</button>
-                <button class="btn-main-action btn-dark" onclick="alert('تم بدء التنزيل بنجاح إلى جهازك')">📥 تنزيل للعرض بدون إنترنت</button>
-            </div>
-
-            <div class="detail-desc" id="det-desc">قصة مشوقة وأحداث مميزة تأخذك في تجربة بصرية ممتعة واستثنائية عبر منصة QFLIX الرقمية.</div>
-
-            <div class="detail-toolbar">
-                <div class="toolbar-item" onclick="alert('تمت الإضافة لقائمتي')"><span>＋</span><span>قائمتي</span></div>
-                <div class="toolbar-item" onclick="alert('شكراً لتقييمك!')"><span>👍</span><span>تقييم</span></div>
-                <div class="toolbar-item" onclick="alert('تم نسخ رابط العرض')"><span>📤</span><span>مشاركة</span></div>
-                <div class="toolbar-item" onclick="alert('جاري تنزيل كافة الحلقات')"><span>📥</span><span>تنزيل</span></div>
-            </div>
-
-            <div class="detail-tabs">
-                <div class="detail-tab active" onclick="switchDetailTab('episodes', this)">الحلقات</div>
-                <div class="detail-tab" onclick="switchDetailTab('similar', this)">عناوين مشابهة</div>
-            </div>
-
-            <div id="episodes-section">
-                <div class="episode-item" onclick="playMovieDirectly()">
-                    <div class="episode-thumb-box">
-                        <img src="https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" class="episode-thumb">
-                        <div class="episode-play-icon">▶</div>
-                    </div>
-                    <div class="episode-info">
-                        <div class="episode-title-row">1. الحلقة الأولى: البداية المشوقة</div>
-                        <div class="episode-duration">25 دقيقة</div>
-                        <div class="episode-desc">تبدأ الأحداث بتطورات سريعة ومفاجآت غير متوقعة تغير مجرى القصة بالكامل.</div>
-                    </div>
-                </div>
-
-                <div class="episode-item" onclick="playMovieDirectly()">
-                    <div class="episode-thumb-box">
-                        <img src="https://image.tmdb.org/t/p/w500/AmR3hzcyNpGMfUnzMI7XW15iM8x.jpg" class="episode-thumb">
-                        <div class="episode-play-icon">▶</div>
-                    </div>
-                    <div class="episode-info">
-                        <div class="episode-title-row">2. الحلقة الثانية: الغموض يتصاعد</div>
-                        <div class="episode-duration">30 دقيقة</div>
-                        <div class="episode-desc">تحقيقات مكثفة ومواجهات ساخنة بين الأبطال لكشف الأسرار الخفية.</div>
-                    </div>
-                </div>
-
-                <div class="episode-item" onclick="playMovieDirectly()">
-                    <div class="episode-thumb-box">
-                        <img src="https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYAmacwm.jpg" class="episode-thumb">
-                        <div class="episode-play-icon">▶</div>
-                    </div>
-                    <div class="episode-info">
-                        <div class="episode-title-row">3. الحلقة الثالثة: نقطة التحول</div>
-                        <div class="episode-duration">28 دقيقة</div>
-                        <div class="episode-desc">مفاجأة صادمة تقلب موازين اللعبة وتكشف الحقيقة الكاملة للجميع.</div>
-                    </div>
-                </div>
-            </div>
-
-            <div id="similar-section" style="display: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                <div class="movie-card-row" style="flex:auto;" onclick="openDetailView('جزيرة المغامرات', 'مغامرة كرتونية ممتعة', '2025', 'فيلم')">
-                    <img src="https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg" class="movie-poster-row">
-                    <div class="movie-title-row">جزيرة المغامرات</div>
-                </div>
-                <div class="movie-card-row" style="flex:auto;" onclick="openDetailView('عائلة مسجونة', 'كوميديا ومقالب مضحكة', '2024', '12 حلقة')">
-                    <img src="https://image.tmdb.org/t/p/w500/AmR3hzcyNpGMfUnzMI7XW15iM8x.jpg" class="movie-poster-row">
-                    <div class="movie-title-row">عائلة مسجونة</div>
-                </div>
-                <div class="movie-card-row" style="flex:auto;" onclick="openDetailView('الهروب الكبير', 'دراما وأكشن واثارة', '2026', 'فيلم')">
-                    <img src="https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYAmacwm.jpg" class="movie-poster-row">
-                    <div class="movie-title-row">الهروب الكبير</div>
-                </div>
-            </div>
+            <div class="detail-desc" id="det-desc">قصة مشوقة وأحداث مميزة تأخذك في تجربة بصرية ممتعة واستثنائية عبر منصة QFLIX.</div>
+            <button class="auth-btn" onclick="playMovieDirectly()">▶ تشغيل العرض الآن</button>
         </div>
     </div>
 
+    <!-- مشغل الفيديو -->
     <div id="video-player-screen">
-        <button class="video-back-btn" onclick="closeVideoPlayer()">✕ إغلاق المشغل</button>
+        <button class="video-back-btn" onclick="closeVideoPlayer()">✕ إغلاق</button>
         <video id="actual-video-player" controls autoplay playsinline>
             <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
-            متصفحك لا يدعم تشغيل الفيديو
         </video>
     </div>
 
+    <!-- الشريط السفلي -->
     <div class="bottom-nav">
         <div class="nav-item active" onclick="scrollToTop()"><span class="nav-icon">🏠</span><span>الرئيسية</span></div>
-        <div class="nav-item" onclick="alert('خاصية البحث مفعلة')"><span class="nav-icon">🔍</span><span>بحث</span></div>
+        <div class="nav-item" onclick="alert('خاصية البحث')"><span class="nav-icon">🔍</span><span>بحث</span></div>
         <div class="nav-item" onclick="switchProfile()"><span class="nav-icon">😊</span><span>حسابي</span></div>
     </div>
 
     <script>
         window.addEventListener('DOMContentLoaded', () => {
             const isInStandaloneMode = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-            if (!isInStandaloneMode) {
-                document.getElementById('pwa-lock').style.display = 'flex';
-                return;
+            if (!isInStandaloneMode && window.innerWidth <= 768) {
+                // للتجربة المباشرة تم تخطي قفل المتصفح لضمان ظهور الصفحة
             }
-            checkUserSession();
+            
+            // تحقق إذا كان مسجل دخول مسبقاً
+            if (localStorage.getItem('qflix_user')) {
+                document.getElementById('auth-screen').style.display = 'none';
+                document.getElementById('profiles-screen').style.display = 'flex';
+            }
+            
+            initDatabase();
         });
-
-        function checkUserSession() {
-            const savedUser = localStorage.getItem('qflix_user');
-            if (!savedUser) {
-                document.getElementById('auth-screen').style.display = 'flex';
-            } else {
-                loadProfiles();
-            }
-        }
 
         function handleAuth() {
             const user = document.getElementById('username-input').value.trim();
@@ -315,16 +204,78 @@
             if(!user || !pass) { alert('الرجاء إدخال البيانات كاملة'); return; }
             localStorage.setItem('qflix_user', user);
             document.getElementById('auth-screen').style.display = 'none';
-            loadProfiles();
+            document.getElementById('profiles-screen').style.display = 'flex';
         }
 
-        function loadProfiles() {
+        function selectProfile() {
+            document.getElementById('profiles-screen').style.display = 'none';
+            document.getElementById('main-content').style.display = 'block';
+        }
+
+        function switchProfile() {
+            document.getElementById('main-content').style.display = 'none';
             document.getElementById('profiles-screen').style.display = 'flex';
-            const container = document.getElementById('profiles-container');
-            container.innerHTML = `
-                <div class="profile-card" onclick="selectProfile()">
-                    <div class="profile-avatar">😊</div>
-                    <div class="profile-name">الملف الرئيسي</div>
+        }
+
+        function scrollToTop() {
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        const posters = [
+            "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+            "https://image.tmdb.org/t/p/w500/AmR3hzcyNpGMfUnzMI7XW15iM8x.jpg",
+            "https://image.tmdb.org/t/p/w500/kyeqWdyUXW608qlYkRqosgbbJyK.jpg",
+            "https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYAmacwm.jpg",
+            "https://image.tmdb.org/t/p/w500/uNZHUbxLNIlpLz7a17N9w5xP9hX.jpg"
+        ];
+
+        function initDatabase() {
+            let kids = [], arabic = [], action = [], comedy = [];
+            for(let i=1; i<=50; i++) {
+                kids.push({title: `مغامرات أطفال ${i}`, desc: 'قصة ممتعة ومسلية للصغار', img: posters[i % posters.length]});
+                arabic.push({title: `دراما عربية ${i}`, desc: 'أجمل الأعمال والمسلسلات العربية الحصرية', img: posters[(i+1) % posters.length]});
+                action.push({title: `أكشن ومغامرة ${i}`, desc: 'أقوى أفلام القتال والمطاردات المثيرة', img: posters[(i+2) % posters.length]});
+                comedy.push({title: `كوميديا ومقالب ${i}`, desc: 'أضحك من قلبك مع أقوى الأعمال الكوميدية', img: posters[(i+3) % posters.length]});
+            }
+
+            renderRow('row-kids', kids);
+            renderRow('row-arabic', arabic);
+            renderRow('row-action', action);
+            renderRow('row-comedy', comedy);
+        }
+
+        function renderRow(elemId, data) {
+            const container = document.getElementById(elemId);
+            if(!container) return;
+            container.innerHTML = data.map(m => `
+                <div class="movie-card-row" onclick="openDetailView('${m.title}', '${m.desc}')">
+                    <img src="${m.img}" class="movie-poster-row" loading="lazy">
+                    <div class="movie-title-row">${m.title}</div>
                 </div>
-                <div class="profile-card" onclick="selectProfile()">
-                    <div class="profile-avatar" style="background:#e50914;">🎬</div>
+            `).join('');
+        }
+
+        function openDetailView(title, desc) {
+            document.getElementById('det-title').innerText = title;
+            document.getElementById('det-desc').innerText = desc;
+            document.getElementById('detail-view').style.display = 'block';
+        }
+
+        function closeDetailView() {
+            document.getElementById('detail-view').style.display = 'none';
+        }
+
+        function playMovieDirectly() {
+            document.getElementById('video-player-screen').style.display = 'flex';
+            const player = document.getElementById('actual-video-player');
+            player.play().catch(e => console.log(e));
+        }
+
+        function closeVideoPlayer() {
+            const player = document.getElementById('actual-video-player');
+            player.pause();
+            document.getElementById('video-player-screen').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
