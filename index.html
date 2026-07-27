@@ -1,67 +1,163 @@
 <!DOCTYPE html>
-<header lang="ar" dir="rtl">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Movie Box - أفلام ومسلسلات</title>
-    <link rel="stylesheet" href="style.css">
+    <title>The Movie Box</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #0b0f19; color: #fff; min-height: 100vh; padding-bottom: 70px; }
+
+        header { background: rgba(11, 15, 25, 0.95); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); border-bottom: 1px solid #1f293d; }
+        .header-container { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; }
+        .logo { font-size: 22px; font-weight: 900; color: #fff; }
+        .logo span { color: #f5c518; }
+        .search-icon { font-size: 18px; cursor: pointer; }
+
+        .categories-bar { display: flex; gap: 10px; overflow-x: auto; padding: 0 20px 15px; scrollbar-width: none; }
+        .categories-bar::-webkit-scrollbar { display: none; }
+        .cat-chip { background: #1f1f1f; color: #9ca3af; padding: 6px 16px; border-radius: 20px; font-size: 13px; white-space: nowrap; cursor: pointer; border: 1px solid #333; }
+        .cat-chip.active { background: #f5c518; color: #000; font-weight: bold; border-color: #f5c518; }
+
+        .hero-section { position: relative; width: 100%; height: 380px; background-size: cover; background-position: center; display: flex; align-items: flex-end; }
+        .hero-overlay { width: 100%; height: 100%; background: linear-gradient(to top, #0b0f19, rgba(11, 15, 25, 0.2)); display: flex; align-items: flex-end; padding: 20px; }
+        .hero-badge { background: #f5c518; color: #000; font-size: 11px; font-weight: bold; padding: 3px 8px; border-radius: 4px; display: inline-block; margin-bottom: 8px; }
+        .hero-title { font-size: 24px; font-weight: 900; margin-bottom: 6px; }
+        .hero-desc { font-size: 13px; color: #9ca3af; margin-bottom: 15px; }
+        .watch-now-btn { background: #f5c518; color: #000; border: none; padding: 10px 22px; border-radius: 6px; font-weight: bold; font-size: 14px; cursor: pointer; }
+
+        .content-container { padding: 20px; }
+        .movie-section { margin-bottom: 25px; }
+        .section-title { font-size: 16px; font-weight: bold; margin-bottom: 12px; color: #f3f4f6; }
+
+        .movies-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+        @media (min-width: 768px) { .movies-grid { grid-template-columns: repeat(6, 1fr); } }
+
+        .movie-card { background: #161e2e; border-radius: 8px; overflow: hidden; cursor: pointer; border: 1px solid #1f293d; }
+        .movie-poster { width: 100%; height: 150px; object-fit: cover; }
+        @media (min-width: 768px) { .movie-poster { height: 220px; } }
+        .movie-info { padding: 8px; }
+        .movie-name { font-size: 12px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+        .movie-year { font-size: 10px; color: #9ca3af; }
+
+        /* شاشة التحميل (زي الصورة الأولى) */
+        #loading-screen { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 20000; justify-content: center; align-items: center; flex-direction: column; }
+        .spinner { width: 50px; height: 50px; border: 4px solid rgba(255,255,255,0.1); border-top: 4px solid #fff; border-radius: 50%; animation: spin 0.8s linear infinite; }
+        .loading-close { position: absolute; top: 20px; left: 20px; color: #fff; font-size: 24px; cursor: pointer; background: none; border: none; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* مشغل الفيديو (زي الصورة الثانية) */
+        #video-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 15000; flex-direction: column; justify-content: center; align-items: center; }
+        #main-video-player { width: 100%; height: 100%; object-fit: contain; }
+        .close-player { position: absolute; top: 20px; left: 20px; background: rgba(0,0,0,0.6); color: #fff; border: 1px solid #555; padding: 6px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; z-index: 16000; font-size: 14px; }
+
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: #0b0f19; display: flex; justify-content: space-around; padding: 10px 0; border-top: 1px solid #1f293d; z-index: 90; }
+        .nav-btn { display: flex; flex-direction: column; align-items: center; color: #6b7280; font-size: 10px; gap: 3px; cursor: pointer; }
+        .nav-btn.active { color: #f5c518; }
+        .nav-btn span { font-size: 16px; }
+    </style>
 </head>
 <body>
 
-    <!-- الهيدر العلوي -->
     <header>
         <div class="header-container">
             <div class="logo">TheMovie<span>Box</span></div>
-            <div class="search-icon" onclick="alert('خاصية البحث')">🔍</div>
+            <div class="search-icon" onclick="alert('بحث')">🔍</div>
         </div>
         <div class="categories-bar">
-            <div class="cat-chip active" onclick="filterCategory('all', this)">الكل</div>
-            <div class="cat-chip" onclick="filterCategory('movies', this)">أفلام</div>
-            <div class="cat-chip" onclick="filterCategory('series', this)">مسلسلات</div>
-            <div class="cat-chip" onclick="filterCategory('animation', this)">انميشن</div>
+            <div class="cat-chip active">الكل</div>
+            <div class="cat-chip">أفلام</div>
+            <div class="cat-chip">مسلسلات</div>
         </div>
     </header>
 
-    <!-- الواجهة الرئيسية / البانر المتحرك -->
-    <section class="hero-section" id="hero-banner">
+    <section class="hero-section" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800');">
         <div class="hero-overlay">
             <div class="hero-info">
                 <span class="hero-badge">حصري</span>
-                <h1 class="hero-title" id="hero-title">أحدث الأفلام العالمية</h1>
-                <p class="hero-desc" id="hero-desc">استمتع بمشاهدة أحدث الإصدارات السينمائية بجودة عالية وبدون تقطيع.</p>
-                <button class="watch-now-btn" onclick="openPlayer('https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4')">▶ مشاهدة الآن</button>
+                <h1 class="hero-title">الوسيط الروحي</h1>
+                <p class="hero-desc">استمتع بمشاهدة أحدث الإصدارات بجودة عالية.</p>
+                <button class="watch-now-btn" onclick="startLoadingAndPlay()">▶ مشاهدة الآن</button>
             </div>
         </div>
     </section>
 
-    <!-- أقسام الأفلام -->
     <main class="content-container">
         <section class="movie-section">
             <h2 class="section-title">🔥 الأفلام الرائجة</h2>
-            <div class="movies-grid" id="grid-trending"></div>
-        </section>
-
-        <section class="movie-section">
-            <h2 class="section-title">🎬 أحدث الأفلام المضافة</h2>
-            <div class="movies-grid" id="grid-latest"></div>
+            <div class="movies-grid" id="grid-movies"></div>
         </section>
     </main>
 
-    <!-- مشغل الفيديو -->
-    <div id="video-modal" class="modal-player">
+    <!-- شاشة التحميل الدوارة -->
+    <div id="loading-screen">
+        <button class="loading-close" onclick="cancelLoading()">✕</button>
+        <div class="spinner"></div>
+    </div>
+
+    <!-- مشغل الفيديو الحقيقي -->
+    <div id="video-modal">
         <button class="close-player" onclick="closePlayer()">✕ إغلاق</button>
         <video id="main-video-player" controls playsinline>
-            <source src="" type="video/mp4">
+            <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4" type="video/mp4">
         </video>
     </div>
 
-    <!-- الشريط السفلي للجوال -->
     <nav class="bottom-nav">
         <div class="nav-btn active">🏠 <span>الرئيسية</span></div>
-        <div class="nav-btn" onclick="alert('قريباً')">🔥 <span>الرائجة</span></div>
-        <div class="nav-btn" onclick="alert('قريباً')">⭐ <span>المفضلة</span></div>
+        <div class="nav-btn">🔥 <span>الرائجة</span></div>
+        <div class="nav-btn">⭐ <span>المفضلة</span></div>
     </nav>
 
-    <script src="script.js"></script>
+    <script>
+        const posters = [
+            "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500",
+            "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500",
+            "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=500",
+            "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500"
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let html = '';
+            for (let i = 1; i <= 12; i++) {
+                html += `
+                    <div class="movie-card" onclick="startLoadingAndPlay()">
+                        <img src="${posters[i % posters.length]}" class="movie-poster" loading="lazy">
+                        <div class="movie-info">
+                            <div class="movie-name">فلم سينمائي ${i}</div>
+                            <div class="movie-year">2026 • HD</div>
+                        </div>
+                    </div>
+                `;
+            }
+            document.getElementById('grid-movies').innerHTML = html;
+        });
+
+        function startLoadingAndPlay() {
+            // 1. إظهار شاشة التحميل الدوارة أولاً (زي الصورة الأولى)
+            document.getElementById('loading-screen').style.display = 'flex';
+
+            // 2. محاكاة وقت التحميل لمدة ثانية ونصف ثم فتح مشغل الفيديو
+            setTimeout(() => {
+                document.getElementById('loading-screen').style.display = 'none';
+                const modal = document.getElementById('video-modal');
+                const player = document.getElementById('main-video-player');
+                modal.style.display = 'flex';
+                player.currentTime = 0;
+                player.play().catch(e => console.log(e));
+            }, 1500);
+        }
+
+        function cancelLoading() {
+            document.getElementById('loading-screen').style.display = 'none';
+        }
+
+        function closePlayer() {
+            const modal = document.getElementById('video-modal');
+            const player = document.getElementById('main-video-player');
+            player.pause();
+            modal.style.display = 'none';
+        }
+    </script>
 </body>
 </html>
