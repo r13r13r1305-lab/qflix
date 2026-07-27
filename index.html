@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>سينما السعودية - Cinema Plus</title>
+    
+    <!-- إعدادات تطبيق الويب (PWA) للأيفون -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Cinema Plus">
+    <link rel="apple-touch-icon" href="https://via.placeholder.com/150/E50914/FFFFFF?text=CINEMA">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background-color: #141414; color: #fff; padding-bottom: 50px; }
+        
+        header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: rgba(0,0,0,0.9); position: sticky; top: 0; z-index: 1000; }
+        .logo { color: #E50914; font-size: 22px; font-weight: bold; letter-spacing: 1px; }
+        .badge { background: #333; font-size: 11px; padding: 4px 8px; border-radius: 4px; color: #aaa; }
+
+        .pwa-banner { background: #1f1f1f; border-bottom: 1px solid #333; padding: 10px 20px; font-size: 13px; text-align: center; color: #ddd; }
+        .pwa-banner span { color: #E50914; font-weight: bold; }
+
+        .section-title { font-size: 18px; margin: 25px 15px 10px; font-weight: bold; border-right: 4px solid #E50914; padding-right: 8px; }
+        .movies-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; padding: 0 15px; }
+        @media(min-width: 600px) { .movies-grid { grid-template-columns: repeat(4, 1fr); } }
+
+        .movie-card { background: #1f1f1f; border-radius: 8px; overflow: hidden; cursor: pointer; transition: transform 0.2s; }
+        .movie-card:active { transform: scale(0.97); }
+        .movie-poster { width: 100%; height: 200px; object-fit: cover; background: #333; }
+        .movie-info { padding: 10px; }
+        .movie-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .movie-cat { font-size: 11px; color: #888; }
+
+        /* شاشة الحظر التام عند تفعيل مانع الإعلانات */
+        #blocker-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141414; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; }
+        #blocker-overlay h1 { color: #E50914; font-size: 24px; margin-bottom: 15px; }
+        #blocker-overlay p { color: #aaa; font-size: 14px; max-width: 400px; line-height: 1.6; }
+
+        /* نافذة المشغل والإعلانات الإجبارية */
+        #player-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 2000; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .close-btn { position: absolute; top: 20px; left: 20px; background: #333; color: #fff; border: none; padding: 8px 15px; border-radius: 5px; font-weight: bold; cursor: pointer; }
+        
+        .ad-container { width: 100%; max-width: 700px; height: 350px; background: #000; border-radius: 8px; display: flex; flex-direction: column; justify-content: center; align-items: center; border: 1px solid #333; position: relative; text-align: center; padding: 20px; }
+        .ad-timer { position: absolute; top: 10px; right: 10px; background: rgba(0,0,0,0.7); color: #fff; padding: 5px 10px; border-radius: 4px; font-size: 12px; }
+    </style>
+</head>
+<body>
+
+    <!-- شاشة الحظر في حال استخدام Ad Blocker -->
+    <div id="blocker-overlay">
+        <h1>⚠️ عذراً عزيزي الزائر</h1>
+        <p>لا يمكنك تصفح المنصة أو مشاهدة الأفلام بينما تقوم بتفعيل <b>مانع الإعلانات (Ad Blocker)</b>. يرجى إيقافه لتستمتع بمشاهدة مجانية بالكامل.</p>
+    </div>
+
+    <header>
+        <div class="logo">CINEMA+</div>
+        <div class="badge">السعودية 🇸🇦</div>
+    </header>
+
+    <div class="pwa-banner">
+        💡 لتجربة تطبيق حقيقية: اضغط زر <span>المشاركة (Share)</span> في سفاري ثم <span>"إضافة إلى الشاشة الرئيسية"</span>.
+    </div>
+
+    <div class="section-title">أفلام Netflix الرائجة</div>
+    <div class="movies-grid" id="netflix-grid"></div>
+
+    <div class="section-title">أحدث أفلام السينما (Box Office)</div>
+    <div class="movies-grid" id="cinema-grid"></div>
+
+    <div class="section-title">مكتبة OSN & MovieBox</div>
+    <div class="movies-grid" id="osn-grid"></div>
+
+    <!-- نافذة العرض والإعلانات الربحية -->
+    <div id="player-modal">
+        <button class="close-btn" id="close-modal-btn" style="display:none;" onclick="closePlayer()">إغلاق ✕</button>
+        <div class="ad-container" id="ad-or-movie-box">
+            <!-- سيتم حقن الإعلان هنا -->
+        </div>
+    </div>
+
+    <script>
+        // 1. كشف مانع الإعلانات
+        function checkAdBlocker() {
+            const bait = document.createElement('div');
+            bait.innerHTML = '&nbsp;';
+            bait.className = 'adsbox ad-zone doubleclick pub_300x250';
+            bait.style.position = 'absolute';
+            bait.style.left = '-999px';
+            document.body.appendChild(bait);
+
+            setTimeout(function() {
+                if (bait.offsetHeight === 0 || window.getComputedStyle(bait).display === 'none') {
+                    document.getElementById('blocker-overlay').style.display = 'flex';
+                }
+                bait.remove();
+            }, 100);
+        }
+
+        window.onload = function() {
+            checkAdBlocker();
+        };
+
+        // 2. قوائم الأفلام
+        const movies = {
+            netflix: [
+                { title: "Strangers 4", cat: "نتفلكس - إثارة", img: "https://via.placeholder.com/300x450/111/fff?text=Netflix+1" },
+                { title: "Extraction 3", cat: "نتفلكس - أكشن", img: "https://via.placeholder.com/300x450/222/fff?text=Netflix+2" }
+            ],
+            cinema: [
+                { title: "Avatar: Fire & Ash", cat: "سينما - خيال علمي", img: "https://via.placeholder.com/300x450/333/fff?text=Cinema+1" },
+                { title: "Mission Impossible", cat: "سينما - أكشن", img: "https://via.placeholder.com/300x450/444/fff?text=Cinema+2" }
+            ],
+            osn: [
+                { title: "Exclusive Series", cat: "OSN - دراما", img: "https://via.placeholder.com/300x450/555/fff?text=OSN+1" },
+                { title: "MovieBox Classics", cat: "MovieBox - منوعة", img: "https://via.placeholder.com/300x450/666/fff?text=MovieBox+1" }
+            ]
+        };
+
+        function renderSection(containerId, data) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = data.map(m => `
+                <div class="movie-card" onclick="startMovieProcess('${m.title}')">
+                    <img src="${m.img}" class="movie-poster" alt="${m.title}">
+                    <div class="movie-info">
+                        <div class="movie-title">${m.title}</div>
+                        <div class="movie-cat">${m.cat}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        renderSection('netflix-grid', movies.netflix);
+        renderSection('cinema-grid', movies.cinema);
+        renderSection('osn-grid', movies.osn);
+
+        // 3. نظام الإعلان الإلزامي للربح (يمكنك وضع رابط Direct Link الخاص بـ HilltopAds هنا)
+        function startMovieProcess(movieTitle) {
+            if(document.getElementById('blocker-overlay').style.display === 'flex') {
+                alert("يرجى إيقاف مانع الإعلانات أولاً.");
+                return;
+            }
+
+            document.getElementById('player-modal').style.display = 'flex';
+            const container = document.getElementById('ad-or-movie-box');
+            document.getElementById('close-modal-btn').style.display = 'none';
+
+            let timeLeft = 5; // 5 ثواني إعلان إلزامي
+            
+            container.innerHTML = `
+                <div class="ad-timer" id="timer-box">إعلان المنصة: (${timeLeft} ث)</div>
+                <div style="font-size: 16px; color: #ffcc00; margin-bottom: 10px;">📢 إعلان ممول لدعم استمرار الموقع</div>
+                <div style="color: #fff; font-size: 14px;">
+                    يرجى الانتظار حتى ينتهي العد التنازلي لتتمكن من مشاهدة الفيلم مجاناً.<br>
+                    <!-- ضع رابط شركة الإعلانات هنا بدلاً من example.com -->
+                    <a href="https://example.com" target="_blank" style="color: #E50914; text-decoration: underline; display:inline-block; margin-top:15px; font-weight:bold;">اضغط هنا لزيارة راعي المنصة</a>
+                </div>
+            `;
+
+            let countdown = setInterval(function() {
+                timeLeft--;
+                const timerElem = document.getElementById('timer-box');
+                if(timerElem) timerElem.innerText = `إعلان المنصة: (${timeLeft} ث)`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(countdown);
+                    container.innerHTML = `
+                        <div style="font-size: 18px; color: #46d369; margin-bottom: 10px; font-weight:bold;">✅ تم التحقق بنجاح</div>
+                        <div style="color: #fff; font-size: 15px;">جاري تشغيل: <b>${movieTitle}</b></div>
+                        <div style="margin-top: 15px; color: #888; font-size: 13px;">(مكان مشغل الفيلم الخارجي أو الـ Embed)</div>
+                    `;
+                    document.getElementById('close-modal-btn').style.display = 'block';
+                }
+            }, 1000);
+        }
+
+        function closePlayer() {
+            document.getElementById('player-modal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>
