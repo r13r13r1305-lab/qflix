@@ -13,11 +13,6 @@
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
         body { background-color: #141414; color: #fff; min-height: 100vh; padding-bottom: 70px; }
 
-        /* قفل المتصفح العادي */
-        #pwa-lock { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #141414; z-index: 9999; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 30px; }
-        #pwa-lock h1 { color: #E50914; font-size: 28px; margin-bottom: 15px; font-weight: 900; }
-        #pwa-lock p { color: #aaa; font-size: 15px; line-height: 1.6; max-width: 400px; }
-
         /* تسجيل الدخول */
         #auth-screen { display: flex; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 8000; justify-content: center; align-items: center; padding: 20px; }
         .auth-box { background: #1f1f1f; padding: 30px; border-radius: 12px; width: 100%; max-width: 380px; text-align: center; border: 1px solid #333; }
@@ -83,12 +78,6 @@
 </head>
 <body>
 
-    <!-- قفل المتصفح العادي -->
-    <div id="pwa-lock">
-        <h1>QFLIX 🇸🇦</h1>
-        <p>لتشغيل المنصة، يرجى إضافة التطبيق إلى <b>الشاشة الرئيسية</b> عبر سفاري (Share > Add to Home Screen).</p>
-    </div>
-
     <!-- تسجيل الدخول -->
     <div id="auth-screen">
         <div class="auth-box">
@@ -130,7 +119,7 @@
             </div>
         </header>
 
-        <div class="hero-banner" style="background-image: url('https://image.tmdb.org/t/p/original/kyeqWdyUXW608qlYkRqosgbbJyK.jpg');">
+        <div class="hero-banner" style="background-image: url('https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=800');">
             <div class="hero-title-img">الوسيط الروحي</div>
             <div class="hero-tags">أحدث الإصدارات • غموض • حلقات كاملة</div>
             <div class="hero-buttons">
@@ -184,17 +173,10 @@
 
     <script>
         window.addEventListener('DOMContentLoaded', () => {
-            const isInStandaloneMode = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-            if (!isInStandaloneMode && window.innerWidth <= 768) {
-                // للتجربة المباشرة تم تخطي قفل المتصفح لضمان ظهور الصفحة
-            }
-            
-            // تحقق إذا كان مسجل دخول مسبقاً
             if (localStorage.getItem('qflix_user')) {
                 document.getElementById('auth-screen').style.display = 'none';
                 document.getElementById('profiles-screen').style.display = 'flex';
             }
-            
             initDatabase();
         });
 
@@ -221,21 +203,21 @@
             window.scrollTo({top: 0, behavior: 'smooth'});
         }
 
-        const posters = [
-            "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-            "https://image.tmdb.org/t/p/w500/AmR3hzcyNpGMfUnzMI7XW15iM8x.jpg",
-            "https://image.tmdb.org/t/p/w500/kyeqWdyUXW608qlYkRqosgbbJyK.jpg",
-            "https://image.tmdb.org/t/p/w500/NNxYkU70HPurnNCSiCjYAmacwm.jpg",
-            "https://image.tmdb.org/t/p/w500/uNZHUbxLNIlpLz7a17N9w5xP9hX.jpg"
+        const validPosters = [
+            "https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500",
+            "https://images.unsplash.com/photo-1518709268805-4e9042af9f23?w=500",
+            "https://images.unsplash.com/photo-1485846234645-a62644f84728?w=500",
+            "https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500",
+            "https://images.unsplash.com/photo-1536440136628-849c177e76a1?w=500"
         ];
 
         function initDatabase() {
             let kids = [], arabic = [], action = [], comedy = [];
-            for(let i=1; i<=50; i++) {
-                kids.push({title: `مغامرات أطفال ${i}`, desc: 'قصة ممتعة ومسلية للصغار', img: posters[i % posters.length]});
-                arabic.push({title: `دراما عربية ${i}`, desc: 'أجمل الأعمال والمسلسلات العربية الحصرية', img: posters[(i+1) % posters.length]});
-                action.push({title: `أكشن ومغامرة ${i}`, desc: 'أقوى أفلام القتال والمطاردات المثيرة', img: posters[(i+2) % posters.length]});
-                comedy.push({title: `كوميديا ومقالب ${i}`, desc: 'أضحك من قلبك مع أقوى الأعمال الكوميدية', img: posters[(i+3) % posters.length]});
+            for(let i=1; i<=20; i++) {
+                kids.push({title: `مغامرات أطفال ${i}`, desc: 'قصة ممتعة ومسلية للصغار', img: validPosters[i % validPosters.length]});
+                arabic.push({title: `دراما عربية ${i}`, desc: 'أجمل الأعمال والمسلسلات العربية الحصرية', img: validPosters[(i+1) % validPosters.length]});
+                action.push({title: `أكشن ومغامرة ${i}`, desc: 'أقوى أفلام القتال والمطاردات المثيرة', img: validPosters[(i+2) % validPosters.length]});
+                comedy.push({title: `كوميديا ومقالب ${i}`, desc: 'أضحك من قلبك مع أقوى الأعمال الكوميدية', img: validPosters[(i+3) % validPosters.length]});
             }
 
             renderRow('row-kids', kids);
@@ -259,10 +241,14 @@
             document.getElementById('det-title').innerText = title;
             document.getElementById('det-desc').innerText = desc;
             document.getElementById('detail-view').style.display = 'block';
+            const trailer = document.getElementById('trailer-video');
+            trailer.play().catch(e => console.log(e));
         }
 
         function closeDetailView() {
             document.getElementById('detail-view').style.display = 'none';
+            const trailer = document.getElementById('trailer-video');
+            trailer.pause();
         }
 
         function playMovieDirectly() {
